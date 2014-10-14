@@ -228,7 +228,9 @@ class mit_krb5(
   $krb5_conf_group          = 'root',
   $krb5_conf_mode           = '0444',
   $install_role             = 'client',
-) {
+  $realms                   = $mit_krb5::params::realms,
+  $domain_realms            = $mit_krb5::params::domain_realms,
+) inherits mit_krb5::params {
   # SECTION: Parameter validation {
   validate_string(
     $default_realm,
@@ -251,6 +253,11 @@ class mit_krb5(
     $krb5_conf_group,
     $krb5_conf_mode,
     $install_role
+  )
+
+  validate_hash(
+    $realms,
+    $domain_realms,
   )
   # Boolean-type parameters are not type-validated at this time.
   # This allows true/false/'yes'/'no'/'1'/0' to be used.
@@ -277,11 +284,15 @@ class mit_krb5(
     order   => '01libdefaults',
     content => template('mit_krb5/libdefaults.erb'),
   }
+  include mit_krb5::resources
   anchor { 'mit_krb5::end': }
   # END Resource creation }
 
   # SECTION: Resource ordering {
-  Anchor['mit_krb5::begin'] -> Class['mit_krb5::install'] ->
-    Concat[$krb5_conf_path] -> Anchor['mit_krb5::end']
+  Anchor['mit_krb5::begin']->
+  Class['mit_krb5::install']->
+  Concat[$krb5_conf_path]->
+  Class['mit_krb5::resources']->
+  Anchor['mit_krb5::end']
   # END Resource ordering }
 }
