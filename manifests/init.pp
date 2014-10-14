@@ -291,7 +291,6 @@ class mit_krb5(
   # SECTION: Resource ordering {
   Anchor['mit_krb5::begin']->
   Class['mit_krb5::install']->
-  Class['mit_krb5::resources']->
   Concat[$krb5_conf_path]->
   Anchor['mit_krb5::end']
   # END Resource ordering }
